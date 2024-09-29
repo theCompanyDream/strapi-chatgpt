@@ -3,6 +3,7 @@ import pluginPkg from "../../package.json";
 import pluginId from "./pluginId";
 import Initializer from "./components/Initializer";
 import PluginIcon from "./components/PluginIcon";
+import TabbedGPT from "./components/TabbedGPT"
 
 const name = pluginPkg.strapi.name;
 
@@ -25,7 +26,10 @@ export default {
       },
       permissions: [],
     });
-
+    app.injectContentManagerComponent('editView', 'right-links', {
+      name: '${pluginId}.plugin.name',
+      Component: TabbedGPT,
+    });
     app.createSettingSection(
       {
         id: pluginId,
@@ -62,29 +66,29 @@ export default {
     });
 
     // Register custom fields with translations
-    // const customFields = [
-    //   { name: 'super-audio', type: 'json', component: import('./components/SuperFields/SuperAudio.jsx') },
-    // ];
+    const customFields = [
+      { name: 'super-audio', type: 'json', component: import('./components/SuperFields/SuperAudio.jsx') },
+    ];
 
-    // customFields.forEach(field => {
-    //   app.customFields.register({
-    //     name: field.name,
-    //     pluginId: pluginId,
-    //     type: field.type,
-    //     intlLabel: {
-    //       id: `${pluginId}.customFields.${field.name}.label`,
-    //       defaultMessage: field.name.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
-    //     },
-    //     intlDescription: {
-    //       id: `${pluginId}.customFields.${field.name}.description`,
-    //       defaultMessage: `A ${field.name.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')} field powered by chatgpt`,
-    //     },
-    //     icon: PluginIcon,
-    //     components: {
-    //       Input: async () => await field.component,
-    //     },
-    //   });
-    // });
+    customFields.forEach(field => {
+      app.customFields.register({
+        name: field.name,
+        pluginId: pluginId,
+        type: field.type,
+        intlLabel: {
+          id: `${pluginId}.customFields.${field.name}.label`,
+          defaultMessage: field.name.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+        },
+        intlDescription: {
+          id: `${pluginId}.customFields.${field.name}.description`,
+          defaultMessage: `A ${field.name.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')} field powered by chatgpt`,
+        },
+        icon: PluginIcon,
+        components: {
+          Input: async () => await field.component,
+        },
+      });
+    });
 
   },
 

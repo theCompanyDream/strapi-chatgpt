@@ -2,7 +2,7 @@
 
 ## 2.0.0
 
-- Added Support for Strapi v5.0
+- Added support for Strapi v5.0
 - Won't be backwards compatable sadly
 
 ## 1.2.3

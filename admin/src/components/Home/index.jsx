@@ -3,33 +3,24 @@ import { useIntl } from "react-intl";
 import { Helmet } from "react-helmet";
 import GitHubButton from 'react-github-btn';
 import axios from "axios";
-import { auth } from "@strapi/helper-plugin";
+import {
+  Layouts
+} from '@strapi/strapi/admin';
 import {
   Button,
   TextInput,
   SingleSelect,
   SingleSelectOption,
-  Layout,
-  HeaderLayout,
-  ContentLayout,
   Main,
   Box,
   Card,
   CardBody,
   CardContent,
   Grid,
-  GridItem,
-  ActionLayout,
-  Tab,
-  Stack,
   Tabs,
-  TabGroup,
-  TabPanels,
-  TabPanel,
   Typography
 } from "@strapi/design-system";
-import { PaperPlane, Command, Cog, Picture, PlusCircle } from "@strapi/icons";
-
+import { PaperPlane, Command, Cog, Palette, PlusCircle } from "@strapi/icons";
 import CustomTab from "./tab";
 import Response from "./response";
 import Help from "../Help";
@@ -39,7 +30,7 @@ import Integration from "../Integration";
 const Home = () => {
   const { formatMessage } = useIntl();
   const imageFormats = [
-    formatMessage({ id: "strapi-supergpt.homePage.imageFormat" }),
+    formatMessage({ id: "homePage.imageFormat" }),
     "1024x1024",
     "1024x1792",
     "1792x1024",
@@ -58,7 +49,7 @@ const Home = () => {
   const instance = axios.create({
     baseURL: process.env.STRAPI_ADMIN_BACKEND_URL,
     headers: {
-      Authorization: `Bearer ${auth.get("jwtToken")}`,
+      Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
       "Content-Type": "application/json",
     },
   });
@@ -74,7 +65,7 @@ const Home = () => {
 
   const setSelectedResponse = (index) => {
     if (index >= convos.length) {
-      setError(formatMessage({id: "strapi-supergpt.homePage.error.unselectableTab"}));
+      setError(formatMessage({id: "homePage.error.unselectableTab"}));
       return;
     }
     const selectedConvo = convos[index];
@@ -90,7 +81,7 @@ const Home = () => {
   };
 
   const handleCreateTab = async () => {
-    const defaultConvoName = formatMessage({id: "strapi-supergpt.homePage.convo.new.name"})
+    const defaultConvoName = formatMessage({id: "homePage.convo.new.name"})
     const { data: newConvo } = await instance.post(`/strapi-supergpt/convo`, {
       name: `${defaultConvoName} ${convos.length + 1}`
     });
@@ -118,12 +109,12 @@ const Home = () => {
       });
     } else {
       await instance.put(`/strapi-supergpt/convo/${id}`, {
-        name: formatMessage({ id: "strapi-supergpt.homePage.convo.default.name" }),
+        name: formatMessage({ id: "homePage.convo.default.name" }),
         content: [],
       });
       setConvos([{
         id,
-        name: formatMessage({ id: "strapi-supergpt.homePage.convo.default.name" }),
+        name: formatMessage({ id: "homePage.convo.default.name" }),
         content: [],
       }]);
       setHighlighted(id);
@@ -134,7 +125,7 @@ const Home = () => {
     e.preventDefault();
     setError("");
     if (!prompt) {
-      setError(formatMessage({id: "strapi-supergpt.homePage.error.promptRequired"}));
+      setError(formatMessage({id: "homePage.error.promptRequired"}));
       return;
     }
 
@@ -142,7 +133,7 @@ const Home = () => {
 
     if (e.target.name === "picture") {
       if (format === imageFormats[0]) {
-        setError(formatMessage({id: "strapi-supergpt.homePage.error.imageSizeRequired"}));
+        setError(formatMessage({id: "homePage.error.imageSizeRequired"}));
         return;
       }
       setLoading(true);
@@ -153,7 +144,7 @@ const Home = () => {
       response = data;
     } else {
       setLoading(true);
-      const format = formatMessage({ id: "strapi-supergpt.homePage.prompt.format"})
+      const format = formatMessage({ id: "homePage.prompt.format"})
       const { data } = await instance.post("/strapi-supergpt/prompt", {
         prompt: `${prompt} ${format}?`,
       });
@@ -209,10 +200,9 @@ const Home = () => {
   }, []);
 
   return (
-    <Layout>
-      <Helmet title={"strapi-supergpt"} />
       <Main aria-busy={false}>
-        <HeaderLayout
+      <Helmet title={"strapi-supergpt"} />
+        <Layouts.Header
           title={
             <Box display="flex" alignItems="center">
               <Typography variant="alpha" as="h1">
@@ -233,11 +223,11 @@ const Home = () => {
             </Box>
           }
           subtitle={formatMessage({
-            id: "strapi-supergpt.homePage.header",
+            id: "homePage.header",
           })}
         />
 
-        <ActionLayout
+        <Layouts.Action
           startActions={
             <SingleSelect onChange={handleImageSizeChange} value={format}>
               {imageFormats.map((format, idx) => (
@@ -247,29 +237,28 @@ const Home = () => {
               ))}
             </SingleSelect>
           }
-          endActions={
-            <Stack horizontal gap={2}>
-              <Button
-                variant="secondary"
-                startIcon={<Cog />}
-                onClick={() => setIsApiIntegrationModalVisible(true)}
-              >
-                {formatMessage({ id: "strapi-supergpt.homePage.API_Integration.button" })}
-              </Button>
-              <Button
-                variant="secondary"
-                startIcon={<Command />}
-                onClick={() => setIsModalVisible(true)}
-              >
-                {formatMessage({ id: "strapi-supergpt.homePage.help.button" })}
-              </Button>
-            </Stack>
-          }
+          // endActions={
+          //   <Stack horizontal gap={2}>
+          //     <Button
+          //       variant="secondary"
+          //       startIcon={<Cog />}
+          //       onClick={() => setIsApiIntegrationModalVisible(true)}
+          //     >
+          //       {formatMessage({ id: "homePage.API_Integration.button" })}
+          //     </Button>
+          //     <Button
+          //       variant="secondary"
+          //       startIcon={<Command />}
+          //       onClick={() => setIsModalVisible(true)}
+          //     >
+          //       {formatMessage({ id: "homePage.help.button" })}
+          //     </Button>
+          //   </Stack>
+          // }
         />
-
-        <ContentLayout>
-          <TabGroup onTabChange={setSelectedResponse}>
-            <Tabs>
+        <Layouts.Content>
+          <Tabs.Root onTabChange={setSelectedResponse}>
+            <Tabs.List>
               {convos.length > 0 && convos.map(convo => (
                 <CustomTab
                   key={convo.id}
@@ -280,41 +269,39 @@ const Home = () => {
                   {convo.name}
                 </CustomTab>
               ))}
-              <Tab onClick={handleCreateTab}><PlusCircle /></Tab>
-            </Tabs>
-            <TabPanels>
-              {convos.length > 0 && convos.map((convo) => (
-                <TabPanel key={convo.id}>
-                  <Card>
-                    <CardBody
-                      style={{
-                        height: "64vh",
-                        overflowY: "scroll",
-                        width: "100%"
-                      }}
-                    >
-                      <CardContent>
-                        <LoadingOverlay isLoading={loading} />
-                          {convo.content.map((response, index) => (
-                            <Response key={`${index}`}>
-                              {response}
-                            </Response>
-                          ))}
-                          <div ref={messagesEndRef} />
-                      </CardContent>
-                    </CardBody>
-                  </Card>
-                </TabPanel>
-              ))}
-            </TabPanels>
-          </TabGroup>
+              <Tabs.Trigger onClick={handleCreateTab}><PlusCircle /></Tabs.Trigger>
+            </Tabs.List>
+            {convos.length > 0 && convos.map((convo) => (
+              <Tabs.Content key={convo.id} value={convo.id}>
+                <Card>
+                  <CardBody
+                    style={{
+                      height: "64vh",
+                      overflowY: "scroll",
+                      width: "100%"
+                    }}
+                  >
+                    <CardContent>
+                      <LoadingOverlay isLoading={loading} />
+                        {convo.content.map((response, index) => (
+                          <Response key={`${index}`}>
+                            {response}
+                          </Response>
+                        ))}
+                        <div ref={messagesEndRef} />
+                    </CardContent>
+                  </CardBody>
+                </Card>
+              </Tabs.Content>
+            ))}
+          </Tabs.Root>
           <Box>
             <form>
-              <Grid spacing={1} gap={2} paddingTop={4}>
-                <GridItem col={11}>
+              <Grid.Root spacing={1} gap={2} paddingTop={4}>
+                <Grid.Item col={11}>
                   <TextInput
                     id="chatInput"
-                    placeholder={formatMessage({ id: "strapi-supergpt.homePage.prompt.placeholder" })}
+                    placeholder={formatMessage({ id: "homePage.prompt.placeholder" })}
                     aria-label="Content"
                     name="prompt"
                     error={error}
@@ -326,8 +313,8 @@ const Home = () => {
                       setError("");
                     }}
                   />
-                </GridItem>
-                <GridItem style={{ display: 'flex', justifyContent: 'space-between', gap: '0.5rem' }}>
+                </Grid.Item>
+                <Grid.Item style={{ display: 'flex', justifyContent: 'space-between', gap: '0.5rem' }}>
                   <Button
                     size="L"
                     name="prompt"
@@ -336,22 +323,22 @@ const Home = () => {
                     loading={loading}
                     onClick={handleSubmit}
                   >
-                    {formatMessage({ id: "strapi-supergpt.homePage.prompt.button" })}
+                    {formatMessage({ id: "homePage.prompt.button" })}
                   </Button>
                   <Button
                     size="L"
                     name="picture"
                     value="picture"
                     onClick={handleSubmit}
-                    startIcon={<Picture />}
+                    startIcon={<Palette />}
                   >
-                    {formatMessage({ id: "strapi-supergpt.homePage.image.button" })}
+                    {formatMessage({ id: "homePage.image.button" })}
                   </Button>
-                </GridItem>
-              </Grid>
+                </Grid.Item>
+              </Grid.Root>
             </form>
           </Box>
-        </ContentLayout>
+        </Layouts.Content>
         <Help
           isOpen={isModalVisible}
           onClose={() => setIsModalVisible(false)}
@@ -361,7 +348,6 @@ const Home = () => {
           onClose={() => setIsApiIntegrationModalVisible(false)}
         />
       </Main>
-    </Layout>
   );
 };
 

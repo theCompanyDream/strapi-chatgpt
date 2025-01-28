@@ -1,64 +1,56 @@
-import { prefixPluginTranslations } from "@strapi/helper-plugin";
 import pluginPkg from "../../package.json";
-import pluginId from "./pluginId";
-import Initializer from "./components/Initializer";
+import {PLUGIN_ID} from "./pluginId";
 import PluginIcon from "./components/PluginIcon";
+import Initializer from "./components/Initializer";
 
 const name = pluginPkg.strapi.name;
 
 export default {
   register(app) {
     app.addMenuLink({
-      to: `/plugins/${pluginId}`,
+      to: `plugins/${PLUGIN_ID}`,
       icon: PluginIcon,
       intlLabel: {
-        id: `strapi-supergpt.name`,
-        defaultMessage: pluginPkg.strapi.displayName,
+        id: `${PLUGIN_ID}.plugin.name`,
+        defaultMessage: PLUGIN_ID,
       },
       Component: async () => {
-        const component = await import(
-          /* webpackChunkName: "[request]" */
-          "./pages/App"
-        );
-
-        return component;
+        const App = await import('./components/Home');
+        return App;
       },
-      permissions: [],
     });
 
     app.createSettingSection(
       {
-        id: pluginId,
+        id: PLUGIN_ID,
         intlLabel: {
-          id: `${pluginId}.name`,
+          id: `${PLUGIN_ID}.name`,
           defaultMessage: `${pluginPkg.strapi.displayName} ${pluginPkg.strapi.kind}`,
         },
       },
       [
         {
           intlLabel: {
-            id: `${pluginId}.configuration`,
+            id: `${PLUGIN_ID}.configuration`,
             defaultMessage: "Configuration",
           },
           id: "strapi-supergpt.name",
-          to: `/settings/${pluginId}`,
+          to: `/settings/${PLUGIN_ID}`,
           Component: async () => {
-            const component = await import(
-              /* webpackChunkName: "stripe-page" */
-              "./pages/Settings"
+            const SettingsPage = await import(
+              "./components/Settings"
             );
-
-            return component;
+            return SettingsPage;
           },
         },
       ],
     );
 
     app.registerPlugin({
-      id: pluginId,
+      id: PLUGIN_ID,
       initializer: Initializer,
       isReady: false,
-      name,
+      name: PLUGIN_ID,
     });
 
     // Register custom fields with translations
@@ -88,30 +80,17 @@ export default {
 
   },
 
-  bootstrap(app) {},
-
   async registerTrads({ locales }) {
-    const importedTrads = await Promise.all(
-      locales.map((locale) => {
-        return import(
-          /* webpackChunkName: "translation-[request]" */
-          `./translations/${locale}.json`
-        )
-          .then(({ default: data }) => {
-            return {
-              data: prefixPluginTranslations(data, pluginId),
-              locale,
-            };
-          })
-          .catch(() => {
-            return {
-              data: {},
-              locale,
-            };
-          });
-      }),
-    );
+    return Promise.all(
+      locales.map(async (locale) => {
+        try {
+          const { default: data } = await import(`./translations/${locale}.json`);
 
-    return Promise.resolve(importedTrads);
+          return { data, locale };
+        } catch {
+          return { data: {}, locale };
+        }
+      })
+    );
   },
 };

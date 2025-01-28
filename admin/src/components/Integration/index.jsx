@@ -1,9 +1,7 @@
 import React from "react";
 import { useIntl } from "react-intl";
 import {
-  ModalLayout,
-  ModalBody,
-  ModalHeader,
+  Modal,
   Typography,
   Divider,
   Box,
@@ -17,28 +15,27 @@ const Integration = ({ isOpen, onClose }) => {
   return (
     <>
       {isOpen && (
-        <ModalLayout onClose={() => onClose(!isOpen)} labelledBy="title">
-          <ModalHeader>
-            <Typography
-              fontWeight="bold"
-              textColor="neutral800"
-              as="h2"
-              id="title-api-integration"
-            >
-              {formatMessage({id: "strapi-supergpt.homePage.API_Integration.button"})}
-            </Typography>
-          </ModalHeader>
-          <ModalBody>
-            {/* Add code block */}
+        <Modal.Root onClose={() => onClose(!isOpen)} labelledBy="title">
+          <Modal.Content>
+            <Modal.Header>
+              <Typography
+                fontWeight="bold"
+                textColor="neutral800"
+                as="h2"
+                id="title-api-integration"
+              >
+                {formatMessage({id: "homePage.API_Integration.button"})}
+              </Typography>
+            </Modal.Header>
             <Typography variant="omega">
-              {formatMessage({id: "strapi-supergpt.integration.instructions"})}
+              {formatMessage({id: "integration.instructions"})}
             </Typography>
 
             <Box paddingTop={6} paddingBottom={6}>
               <Divider />
             </Box>
 
-            <Typography variant="omega">{formatMessage({id: "strapi-supergpt.integration.sampleRequest"})}</Typography>
+            <Typography variant="omega">{formatMessage({id: "integration.sampleRequest"})}</Typography>
             <br />
             <SyntaxHighlighter
               language="bash"
@@ -58,7 +55,7 @@ const Integration = ({ isOpen, onClose }) => {
               <Divider />
             </Box>
             <Typography variant="omega">
-              {formatMessage({id: "strapi-supergpt.integration.openAiParams"})}
+              {formatMessage({id: "integration.openAiParams"})}
             </Typography>
             <br />
             <SyntaxHighlighter
@@ -97,8 +94,8 @@ const Integration = ({ isOpen, onClose }) => {
             >
               {`{"response": "Sample response"}`}
             </SyntaxHighlighter>
-          </ModalBody>
-        </ModalLayout>
+          </Modal.Content>
+        </Modal.Root>
       )}
     </>
   );
